@@ -14,10 +14,14 @@ export default {
   },
   methods: {
     addTodo() {
-      console.log(this.newTodoItem);
-      localStorage.setItem(this.newTodoItem, this.newTodoItem);
-      this.clearInput();
+      if (this.newTodoItem !== "") {
+        var obj = { completed: false, item: this.newTodoItem };
+        console.log(this.newTodoItem);
+        localStorage.setItem(this.newTodoItem, JSON.stringify(obj));
+        this.clearInput();
+      }
     },
+
     clearInput() {
       this.newTodoItem = "";
     },
