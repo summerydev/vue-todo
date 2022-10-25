@@ -29,6 +29,11 @@
   - [todo 삭제 시 리스트 업데이트](#todo-삭제-시-리스트-업데이트)
   - [todo 완료 기능 수정](#todo-완료-기능-수정)
   - [todo 전체 삭제 시 리스트 업데이트](#todo-전체-삭제-시-리스트-업데이트)
+- [UX개선](#UX개선)
+  - [개선 요구 사항](#개선-요구-사항)
+  - [Modal.vue 생성](#modalvue-생성)
+  - [컴포넌트 주입(1)](#컴포넌트-주입1)
+  - [컴포넌트 주입(2)](#컴포넌트-주입2)
 
 ---
 
@@ -99,8 +104,8 @@ export default {
     TodoList: TodoList,
     TodoFooter: TodoFooter,
   }
-```
-
+```  
+&nbsp; 
 ## TodoHeader 컴포넌트 구현
 
 - style의 scoped 속성 : 현재 컴포넌트에만 적용됨을 의미
@@ -118,7 +123,7 @@ h1 {
 }
 </style>
 ```
-
+&nbsp; 
 ## TodoInput 컴포넌트 구현
 
 - input태그에 들어오는 데이터를 v-model을 사용해 newTodoItem로 설정
@@ -152,7 +157,7 @@ export default {
   },
 };
 ```
-
+&nbsp; 
 ## TodoList 컴포넌트 구현
 
 ### todoList 화면 구현
@@ -198,7 +203,7 @@ export default {
   },
 };
 ```
-
+&nbsp; 
 ### todoList 삭제 구현
 
 - 삭제 버튼 클릭 시 `v-on:click` 사용해 삭제 메소드 실행
@@ -243,7 +248,7 @@ export default {
 };
 </script>
 ```
-
+&nbsp; 
 ## 완료 기능 추가
 
 ### TodoInput 수정
@@ -261,7 +266,7 @@ addTodo() {
       }
     },
 ```
-
+&nbsp; 
 ### TodoList 수정
 
 - 체크 버튼 클릭 시 text 색 변경 및 삭제 라인 변경되도록 css class 바뀌는 `v-bind:class` 설정
@@ -331,7 +336,7 @@ export default {
   },
 };
 ```
-
+&nbsp; 
 ## TodoFooter 컴포넌트 구현
 
 ### 전체 삭제 버튼 구현
@@ -361,14 +366,14 @@ export default {
 confirm를 사용해서 확인을 누르면 로컬스토리지의 데이터가 전부 삭제되도록, 취소를 누르면 실행되는 코드가 없도록 작성했다.
 
 ---
-
+&nbsp; 
 # 리팩토링
 
 ## 문제점
 
 - 할 일 등록 시 리스트가 업데이트 되지 않음
 - 할 일 전체 삭제 시 리스트가 업데이트 되지 않음
-
+&nbsp; 
 ## App.vue로 데이터 흐름 변경
 
 - TodoList data를 App.vue로 넣고, 값을 TodoList propsdata로 보내는 방식으로 변경
@@ -421,7 +426,7 @@ export default {
 ```
 
 ---
-
+&nbsp; 
 ## todo 추가 시 리스트 업데이트
 
 - TodoInput에서 버튼을 클릭해 아이템을 추가할 때마다 이벤트를 발생시켜 App.vue로 emit보내기
@@ -455,7 +460,7 @@ methods: {
 ```
 
 ---
-
+&nbsp; 
 ## todo 삭제 시 리스트 업데이트
 
 - TodoList에서 삭제 버튼을 클릭할 때마다 App.vue로 emit발생
@@ -485,7 +490,7 @@ removeOneItem(todoItem, index) {
 ```
 
 ---
-
+&nbsp; 
 ## todo 완료 기능 수정
 
 - TodoList에서 emit발생 후 App.vue에서 동작하도록 수정
@@ -517,7 +522,7 @@ toggleOneItem(todoItem, index) {
 ```
 
 ---
-
+&nbsp; 
 ## todo 전체 삭제 시 리스트 업데이트
 
 - todoFooter에서 전체 삭제 버튼 클릭, confirm에서 확인 클릭 시 emit발생
@@ -543,3 +548,211 @@ clearAllItems() {
       this.todoItems = [];
     },
 ```
+
+---
+&nbsp; 
+# 개선 요구 사항
+
+- input에 입력값 없을 때 버튼 클릭 시 alert
+  - modal 컴포넌트 생성
+- 전체 삭제 시 modal 컴포넌트 재활용
+
+&nbsp; 
+# Modal.vue 생성
+
+[https://v2.vuejs.org/v2/examples/modal.html](https://v2.vuejs.org/v2/examples/modal.html)
+
+[https://codesandbox.io/s/github/vuejs/v2.vuejs.org/tree/master/src/v2/examples/vue-20-modal-component?from-embed=&file=/index.html:285-1096](https://codesandbox.io/s/github/vuejs/v2.vuejs.org/tree/master/src/v2/examples/vue-20-modal-component?from-embed=&file=/index.html:285-1096)
+
+- [vue공식사이트](https://v2.vuejs.org/v2/examples/modal.html)의 modal 컴포넌트 예시를 가져와 common폴더에 Modal 컴포넌트 파일을 생성한다.
+
+`/common/Modal.vue`
+
+```
+<template>
+  <transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+          <div class="modal-header">
+            <slot name="header"> default header </slot>
+          </div>
+
+          <div class="modal-body">
+            <slot name="body"> default body </slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</template>
+```
+
+```jsx
+<style>
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: table;
+  transition: opacity 0.3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 300px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  transition: all 0.3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 20px 0;
+}
+
+.modal-default-button {
+  float: right;
+}
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+</style>
+```
+
+&nbsp; 
+# 컴포넌트 주입(1)
+
+input 입력값이 없을 때 modal창이 띄워져야 하기 때문에 TodoIput.vue 파일에 컴포넌트를 주입한다.
+
+- 스크립트에 import
+- component에 정의
+- data에 showModal값 생성
+- template에 생성
+
+`TodoInput.vue`
+
+```jsx
+<template>
+  <div>
+    <input type="text" v-model="newTodoItem" v-on:keyup.enter="addTodo" />
+    <button v-on:click="addTodo">+</button>
+    <Modal v-if="showModal" @close="showModal = false">
+      <h3 slot="header">🧐 <button @click="showModal = false">❌</button></h3>
+      <div slot="body">아무것도 입력하지 않으셨네요!</div>
+    </Modal>
+  </div>
+</template>
+```
+
+```jsx
+import Modal from "./common/Modal.vue";
+
+export default {
+  data: () => {
+    return {
+      newTodoItem: "",
+      showModal: false,
+    };
+  },
+
+  methods: {
+    addTodo() {
+      if (this.newTodoItem !== "") {
+        this.$emit("addTodoItem", this.newTodoItem);
+        this.clearInput();
+      } else {
+        this.showModal = !this.showModal;
+      }
+    },
+    clearInput() {
+      this.newTodoItem = "";
+    },
+  },
+
+  components: { Modal: Modal },
+};
+```
+
+&nbsp; 
+# 컴포넌트 주입(2)
+
+전체 삭제 버튼 클릭 시 브라우저 confirm창이 아닌 modal 창으로 변경하기 위해 TodoFooter에 Modal컴포넌트를 주입한다.
+
+- 스크립트에 import
+- data속성에 showModal 정의
+- methods 수정
+- Modal태그 안에 취소버튼, 삭제하기 버튼 생성
+
+`TodoFooter.vue`
+
+```jsx
+<template>
+  <footer>
+    <button @click="showModal = true">전체 삭제</button>
+    <Modal v-if="showModal" @close="showModal = false">
+      <h1 slot="header">⚠️</h1>
+      <div slot="body">
+        모두 삭제하시겠습니까?
+        <div>
+          <button @click="showModal = false">취소</button>
+          <button v-on:click="clearAll" @click="showModal = false">
+            삭제하기
+          </button>
+        </div>
+      </div>
+    </Modal>
+  </footer>
+</template>
+```
+
+```jsx
+import Modal from "./common/Modal.vue";
+
+export default {
+  data: () => {
+    return {
+      showModal: false,
+    };
+  },
+  methods: {
+    clearAll() {
+      this.$emit("clear");
+    },
+  },
+  components: {
+    Modal: Modal,
+  },
+};
+```
+
+Modal 컴포넌트 태그 안에 취소 버튼은 클릭 시 모달이 닫기도록, 삭제하기 버튼은 모달이 닫김과 동시에 클릭이벤트로 clearAll 메소드가 실행되도록 작성했다.
+
+clearAll 메소드는 상위 컴포넌트로 clear emit을 발생시키고, App.vue에서 로직을 처리한다.
