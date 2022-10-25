@@ -79,7 +79,7 @@ input {
 }
 
 button {
-  border-style: groove;
+  border-style: none;
 }
 
 .shadow {
