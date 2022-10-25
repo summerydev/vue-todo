@@ -9,7 +9,7 @@ export default {
   methods: {
     clearAll() {
       if (confirm("전체 삭제 하시겠습니까?")) {
-        localStorage.clear();
+        this.$emit("clear");
       }
     },
   },
