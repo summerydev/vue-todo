@@ -1,7 +1,7 @@
 <template>
   <div>
     <input type="text" v-model="newTodoItem" v-on:keyup.enter="addTodo" />
-    <button v-on:click="addTodo">+</button>
+    <button v-on:click="addTodo">➕</button>
     <Modal v-if="showModal" @close="showModal = false">
       <h3 slot="header">🧐</h3>
       <div slot="body">
