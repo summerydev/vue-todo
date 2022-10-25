@@ -3,7 +3,6 @@
     <button
       @click="
         showModal = true;
-        checkData;
       "
     >
       전체 삭제
@@ -47,10 +46,6 @@ export default {
   methods: {
     clearAll() {
       this.$emit("clear");
-    },
-
-    checkData() {
-      this.propsdata.length == 0 ? false : true;
     },
   },
 
