@@ -3,8 +3,13 @@
     <input type="text" v-model="newTodoItem" v-on:keyup.enter="addTodo" />
     <button v-on:click="addTodo">+</button>
     <Modal v-if="showModal" @close="showModal = false">
-      <h3 slot="header">🧐 <button @click="showModal = false">❌</button></h3>
-      <div slot="body">아무것도 입력하지 않으셨네요!</div>
+      <h3 slot="header">🧐</h3>
+      <div slot="body">
+        아무것도 입력하지 않으셨네요!
+        <div>
+          <button @click="showModal = false">❌</button>
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
