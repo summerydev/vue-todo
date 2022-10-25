@@ -34,6 +34,7 @@
   - [Modal.vue 생성](#modalvue-생성)
   - [컴포넌트 주입(1)](#컴포넌트-주입1)
   - [컴포넌트 주입(2)](#컴포넌트-주입2)
+  - [`v-if` 사용해 modal 로직 처리](#v-if-사용해-modal-로직-처리)
 
 ---
 
@@ -756,3 +757,69 @@ export default {
 Modal 컴포넌트 태그 안에 취소 버튼은 클릭 시 모달이 닫기도록, 삭제하기 버튼은 모달이 닫김과 동시에 클릭이벤트로 clearAll 메소드가 실행되도록 작성했다.
 
 clearAll 메소드는 상위 컴포넌트로 clear emit을 발생시키고, App.vue에서 로직을 처리한다.
+
+
+---  
+&nbsp;
+# `v-if` 사용해 modal 로직 처리
+
+기존 코드로는 삭제할 항목이 없음에도 `모두 삭제하시겠습니까?` 모달이 보여진다.
+
+`v-if`, `v-else-if`를 사용해 삭제 항목 없을 시 다른 모달을 보여주도록 변경한다.
+
+`App.vue`
+
+- App.vue에서 TodoFooter로 props 전달
+
+```jsx
+<TodoFooter
+  v-bind:propsdata="todoItems"
+  v-on:clear="clearAllItems"
+></TodoFooter>
+```
+
+`TodoFooter.vue`
+
+- TodoFooter에서 propsdata 정의
+
+```jsx
+props: ["propsdata"],
+
+data: () => {
+    return {
+      showModal: false,
+    };
+  },
+```
+
+- 삭제할 항목이 있는 경우
+
+```jsx
+<Modal v-if="showModal && propsdata.length != 0" @close="showModal = false">
+      <h1 slot="header">⚠️</h1>
+      <div slot="body">
+        모두 삭제하시겠습니까?
+        <div>
+          <button @click="showModal = false">취소</button>
+          <button v-on:click="clearAll" @click="showModal = false">
+            삭제하기
+          </button>
+        </div>
+      </div>
+    </Modal>
+```
+
+- 삭제할 항목이 없는 경우
+
+```jsx
+<Modal
+      v-else-if="showModal && propsdata.length == 0"
+      @close="showModal = false"
+    >
+      <h1 slot="header">🤓</h1>
+      <div slot="body">
+        삭제할 항목이 없습니다.
+        <button @click="showModal = false">닫기</button>
+      </div>
+    </Modal>
+```
