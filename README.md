@@ -10,8 +10,7 @@
 - [개요](#개요)
   - [개발환경](#개발환경)
   - [컴포넌트 구성](#컴포넌트-구성)
-- [구현]()
-
+- [구현](#구현)
   - [프로젝트 생성](#프로젝트-생성)
   - [컴포넌트 생성 및 등록](#컴포넌트-생성-및-등록)
   - [TodoHeader 컴포넌트 구현](#todoheader-컴포넌트-구현)
@@ -24,7 +23,13 @@
     - [TodoList 수정](#todolist-수정)
   - [TodoFooter 컴포넌트 구현](#todofooter-컴포넌트-구현)
     - [전체 삭제 버튼 구현](#전체-삭제-버튼-구현)
-- [리뷰](#리뷰)
+- [리팩토링](#리팩토링)
+  - [App.vue로 데이터 흐름 변경](#appvue로-데이터-흐름-변경)
+  - [todo 추가 시 리스트 업데이트](#todo-추가-시-리스트-업데이트)
+  - [todo 삭제 시 리스트 업데이트](#todo-삭제-시-리스트-업데이트)
+  - [todo 완료 기능 수정](#todo-완료-기능-수정)
+  - [todo 전체 삭제 시 리스트 업데이트](#todo-전체-삭제-시-리스트-업데이트)
+
 ---
 
 # 개요
@@ -36,8 +41,7 @@
 - [Node.js](https://nodejs.org/en/)
 - [Vue.js Devtools](https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
 - [Git](https://git-scm.com/downloads)
-- [Github](https://github.com/)    
-
+- [Github](https://github.com/)
 
 ## 컴포넌트 구성
 
@@ -355,9 +359,187 @@ export default {
 ```
 
 confirm를 사용해서 확인을 누르면 로컬스토리지의 데이터가 전부 삭제되도록, 취소를 누르면 실행되는 코드가 없도록 작성했다.
-   
+
 ---
-    
-# 리뷰
-현재 작성한 app의 전체적인 문제로 input 입력 시 그리고 전체 삭제 시 todoList가 업데이트 되지 않는다.
-앱 구조 전체를 개선하면서 TodoList컴포넌트의 데이터가 전체 앱의 data로 들어오면 좋을 것 같다.
+
+# 리팩토링
+
+## 문제점
+
+- 할 일 등록 시 리스트가 업데이트 되지 않음
+- 할 일 전체 삭제 시 리스트가 업데이트 되지 않음
+
+## App.vue로 데이터 흐름 변경
+
+- TodoList data를 App.vue로 넣고, 값을 TodoList propsdata로 보내는 방식으로 변경
+- App.vue
+
+```jsx
+<template>
+  <div id="app">
+    <TodoHeader></TodoHeader>
+    <TodoInput></TodoInput>
+    <TodoList v-bind:propsdata="todoItems"></TodoList>
+    <TodoFooter></TodoFooter>
+  </div>
+</template>
+```
+
+```jsx
+export default {
+  data: () => {
+    return {
+      todoItems: [],
+    };
+  },
+
+  created() {
+    if (localStorage.length > 0) {
+      for (let i = 0; i < localStorage.length; i++) {
+        this.todoItems.push(
+          JSON.parse(localStorage.getItem(localStorage.key(i)))
+        );
+      }
+    }
+  },
+```
+
+- TodoList.vue
+
+```jsx
+<li
+  v-for="(todoItem, index) in propsdata"
+  v-bind:key="todoItem.item"
+  class="shadow"
+>
+```
+
+```jsx
+export default {
+  props: ["propsdata"],
+// ...
+```
+
+---
+
+## todo 추가 시 리스트 업데이트
+
+- TodoInput에서 버튼을 클릭해 아이템을 추가할 때마다 이벤트를 발생시켜 App.vue로 emit보내기
+- App.vue에서는 emit 발생 마다 todoItems 배열에 newTodoItem push
+- TodoInput.vue
+
+```jsx
+methods: {
+    addTodo() {
+      if (this.newTodoItem !== "") {
+        this.$emit("addTodoItem", this.newTodoItem)
+        this.clearInput();
+      }
+    },
+```
+
+- App.vue
+
+```jsx
+<TodoList v-bind:propsdata="todoItems"></TodoList>
+```
+
+```jsx
+methods: {
+    addOneItem(todoItem) {
+      var obj = { completed: false, item: todoItem };
+      localStorage.setItem(todoItem, JSON.stringify(obj));
+      this.todoItems.push(obj);
+    },
+  },
+```
+
+---
+
+## todo 삭제 시 리스트 업데이트
+
+- TodoList에서 삭제 버튼을 클릭할 때마다 App.vue로 emit발생
+- App.vue에서 emit을 받을 때마다 todoItems 배열에서 해당 아이템 삭제
+- TodoList.vue
+
+```jsx
+removeTodo(todoItem, index) {
+      this.$emit("removeTodoItem", todoItem, index);
+    },
+```
+
+- App.vue
+
+```jsx
+<TodoList
+  v-bind:propsdata="todoItems"
+  v-on:removeTodoItem="removeOneItem"
+></TodoList>
+```
+
+```jsx
+removeOneItem(todoItem, index) {
+      localStorage.removeItem(todoItem.item);
+      this.todoItems.splice(index, 1);
+    },
+```
+
+---
+
+## todo 완료 기능 수정
+
+- TodoList에서 emit발생 후 App.vue에서 동작하도록 수정
+- TodoList.vue
+
+```jsx
+toggleComplete(todoItem, index) {
+      this.$emit("toggleItem", todoItem, index);
+    },
+```
+
+- App.vue
+
+```jsx
+<TodoList
+  v-bind:propsdata="todoItems"
+  v-on:removeTodoItem="removeOneItem"
+  v-on:toggleItem="toggleOneItem"
+></TodoList>
+```
+
+```jsx
+toggleOneItem(todoItem, index) {
+   // todoItem.completed = !todoItem.completed;
+   this.todoItems[index].completed = !this.todoItems[index].completed;
+   localStorage.removeItem(todoItem.item);
+    ocalStorage.setItem(todoItem.item, JSON.stringify(todoItem));
+    },
+```
+
+---
+
+## todo 전체 삭제 시 리스트 업데이트
+
+- todoFooter에서 전체 삭제 버튼 클릭, confirm에서 확인 클릭 시 emit발생
+- App.vue에서 emit발생 시 clearAllItems 메서드 실행
+- TodoInput.vue
+
+```jsx
+clearInput() {
+      this.newTodoItem = "";
+    },
+```
+
+- App.vue
+
+```jsx
+<TodoFooter v-on:clear="clearAllItems"></TodoFooter>
+```
+
+```jsx
+clearAllItems() {
+      console.log("a");
+      localStorage.clear();
+      this.todoItems = [];
+    },
+```
