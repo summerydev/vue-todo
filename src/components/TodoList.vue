@@ -27,11 +27,11 @@
 export default {
   methods: {
     toggleComplete(todoItem, index) {
-      this.$store.commit("completeOneItem", todoItem, index);
+      this.$store.commit("completeOneItem", { todoItem, index });
     },
 
     removeTodo(todoItem, index) {
-      this.$store.commit("removeOneItem", todoItem, index)
+      this.$store.commit("removeOneItem", { todoItem, index });
     },
   },
 };
@@ -43,9 +43,9 @@ ul {
   text-align: start;
 }
 
-li>div{
+li > div {
   display: flex;
-  flex-direction:row-reverse
+  flex-direction: row-reverse;
 }
 
 button {
