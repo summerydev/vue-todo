@@ -1,13 +1,10 @@
 <template>
   <footer>
-    <button
-      @click="
-        showModal = true;
-      "
+    <button @click="showModal = true">전체 삭제</button>
+    <Modal
+      v-if="showModal && this.$store.state.todoItems.length != 0"
+      @close="showModal = false"
     >
-      전체 삭제
-    </button>
-    <Modal v-if="showModal && propsdata.length != 0" @close="showModal = false">
       <h1 slot="header">⚠️</h1>
       <div slot="body">
         모두 삭제하시겠습니까?
@@ -20,7 +17,7 @@
       </div>
     </Modal>
     <Modal
-      v-else-if="showModal && propsdata.length == 0"
+      v-else-if="showModal && this.$store.state.todoItems.length == 0"
       @close="showModal = false"
     >
       <h1 slot="header">🤓</h1>
@@ -36,16 +33,14 @@
 import Modal from "./common/Modal.vue";
 
 export default {
-  props: ["propsdata"],
-
   data: () => {
     return {
       showModal: false,
     };
   },
   methods: {
-    clearAll() {
-      this.$emit("clear");
+    clearAll(state) {
+      this.$store.commit("clearAllItems", state);
     },
   },
 
