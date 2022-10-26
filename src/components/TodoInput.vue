@@ -28,18 +28,19 @@ export default {
   methods: {
     addTodo() {
       if (this.newTodoItem !== "") {
-        this.$emit("addTodoItem", this.newTodoItem);
+        this.$store.commit("addOneItem", this.newTodoItem);
         this.clearInput();
       } else {
         this.showModal = !this.showModal;
       }
     },
+    
     clearInput() {
       this.newTodoItem = "";
     },
   },
 
-  components: { Modal},
+  components: { Modal },
 };
 </script>
 
