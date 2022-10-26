@@ -1,16 +1,9 @@
 <template>
   <div id="app">
     <TodoHeader></TodoHeader>
-    <TodoInput v-on:addTodoItem="addOneItem"></TodoInput>
-    <TodoList
-      v-bind:propsdata="todoItems"
-      v-on:removeTodoItem="removeOneItem"
-      v-on:toggleItem="toggleOneItem"
-    ></TodoList>
-    <TodoFooter
-      v-bind:propsdata="todoItems"
-      v-on:clear="clearAllItems"
-    ></TodoFooter>
+    <TodoInput></TodoInput>
+    <TodoList></TodoList>
+    <TodoFooter></TodoFooter>
   </div>
 </template>
 
@@ -25,30 +18,6 @@ export default {
     return {
       todoItems: [],
     };
-  },
-
-  methods: {
-    addOneItem(todoItem) {
-      const obj = { completed: false, item: todoItem };
-      localStorage.setItem(todoItem, JSON.stringify(obj));
-      this.todoItems.push(obj);
-    },
-
-    removeOneItem(todoItem, index) {
-      localStorage.removeItem(todoItem.item);
-      this.todoItems.splice(index, 1);
-    },
-
-    clearAllItems() {
-      localStorage.clear();
-      this.todoItems = [];
-    },
-    toggleOneItem(todoItem, index) {
-      // todoItem.completed = !todoItem.completed;
-      this.todoItems[index].completed = !this.todoItems[index].completed;
-      localStorage.removeItem(todoItem.item);
-      localStorage.setItem(todoItem.item, JSON.stringify(todoItem));
-    },
   },
 
   components: {
