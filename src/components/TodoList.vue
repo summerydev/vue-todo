@@ -27,11 +27,11 @@
 export default {
   methods: {
     toggleComplete(todoItem, index) {
-      this.$emit("toggleItem", todoItem, index);
+      this.$store.commit("completeOneItem", todoItem, index);
     },
 
     removeTodo(todoItem, index) {
-      this.$emit("removeTodoItem", todoItem, index);
+      this.$store.commit("removeOneItem", todoItem, index)
     },
   },
 };
