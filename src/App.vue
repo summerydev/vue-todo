@@ -51,10 +51,6 @@ export default {
     },
   },
 
-  created() {
-
-  },
-
   components: {
     TodoHeader,
     TodoInput,

@@ -25,7 +25,6 @@
 
 <script>
 export default {
-  props: ["propsdata"],
   methods: {
     toggleComplete(todoItem, index) {
       this.$emit("toggleItem", todoItem, index);
