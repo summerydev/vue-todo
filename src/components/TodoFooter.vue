@@ -2,7 +2,7 @@
   <footer>
     <button @click="showModal = true">전체 삭제</button>
     <Modal
-      v-if="showModal && this.$store.state.todoItems.length != 0"
+      v-if="showModal && this.storedTodoItems != 0"
       @close="showModal = false"
     >
       <h1 slot="header">⚠️</h1>
@@ -17,7 +17,7 @@
       </div>
     </Modal>
     <Modal
-      v-else-if="showModal && this.$store.state.todoItems.length == 0"
+      v-else-if="showModal && this.storedTodoItems == 0"
       @close="showModal = false"
     >
       <h1 slot="header">🤓</h1>
@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from "vuex";
 import Modal from "./common/Modal.vue";
 
 export default {
@@ -39,9 +40,10 @@ export default {
     };
   },
   methods: {
-    clearAll(state) {
-      this.$store.commit("clearAllItems", state);
-    },
+    ...mapMutations({ clearAll: "clearAllItems" }),
+  },
+  computed: {
+    ...mapGetters(["storedTodoItems"]),
   },
 
   components: {
