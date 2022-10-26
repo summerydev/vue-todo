@@ -1,5 +1,7 @@
 <template>
-  <header><h1>my TODOs</h1></header>
+  <header>
+    <h1>{{ this.$store.state.headerText }}</h1>
+  </header>
 </template>
 
 <script>
