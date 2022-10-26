@@ -17,7 +17,7 @@
   - [todo 삭제 기능 리팩토링](#todo-삭제-기능-리팩토링)
   - [todo 완료 기능 리팩토링](#todo-완료-기능-리팩토링)
   - [todo 전체 삭제 기능 리팩토링](#todo-전체-삭제-기능-리팩토링)
-
+- [헬퍼 사용하기](#헬퍼-사용하기)
 ---
 
 # Vuex란
@@ -311,4 +311,74 @@ mutations: {
 	      state.todoItems = [];
 	    },
 }
+```
+
+
+---
+
+# 헬퍼 사용하기
+
+`getters` , `mapGetters` , `mapMutations` 헬퍼 함수 사용을 통해 state값을 vue 컴포넌트에서 쉽게 연결할 수 있도록 리팩토링 한다.
+
+`store.js`
+
+getters 설정을 통해 state에서 todoItems를 바로 받아 올 수 있도록 설정
+
+```jsx
+getters: {
+    storedTodoItems(state) {
+      return state.todoItems;
+    },
+  },
+```
+
+`TodoList.vue`
+
+- mapGetters, mapMutations를 import
+
+```jsx
+import { mapGetters, mapMutations } from "vuex";
+```
+
+- computed 속성에 스프레드 연산자를 사용해 mapGetters를 설정
+
+```jsx
+  computed: {
+    ...mapGetters(["storedTodoItems"]),
+  },
+```
+
+- 기존에 `this.storedTodoItems` 로 state 값에 접근
+
+```jsx
+// 기존 코드
+v-for="(todoItem, index) in this.$store.state.todoItems"
+
+// 변경 코드
+v-for="(todoItem, index) in this.storedTodoItems"
+```
+
+- 기존 메서드 대신 mapMutations를 설정한다.
+
+```jsx
+// 기존 코드
+export default {
+  methods: {
+    toggleComplete(todoItem, index) {
+      this.$store.commit("completeOneItem", { todoItem, index });
+    },
+
+    removeTodo(todoItem, index) {
+      this.$store.commit("removeOneItem", { todoItem, index });
+    },
+
+// 변경 코드
+export default {
+  methods: {
+    ...mapMutations({
+      removeTodo: "removeOneItem",
+      toggleComplete: "completeOneItem",
+    }),
+  },
+};
 ```
