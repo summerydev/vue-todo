@@ -1,13 +1,15 @@
 <template>
   <header>
     <h1>
-      <a href="">{{ this.$store.state.headerText }}</a>
+      <a href="">My Todos</a>
     </h1>
   </header>
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {},
+};
 </script>
 
 <style scoped>
@@ -16,7 +18,7 @@ h1 {
   font-weight: 900;
   margin: 2.5rem 0 1.5rem;
 }
-a{
+a {
   text-decoration: none;
 }
 </style>
